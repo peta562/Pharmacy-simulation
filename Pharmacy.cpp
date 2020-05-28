@@ -69,8 +69,8 @@ void Pharmacy::Arrival()
 	{
 		toArrival = 1;
 	}
-	i = Choice(); // ¬ыбираем куда встать клиенту
-	if (i == 0) // мест нет, за€вка тер€етс€
+	i = Choice(); // Choose where to get the client
+	if (i == 0) // there are no places, the application is lost
 	{
 		if (mp->total < mp->K * mp->Dump)
 		{
@@ -79,14 +79,15 @@ void Pharmacy::Arrival()
 		mp->reject++;
 		return;
 	}
-	//ћеста есть, генерируем за€вку
+	// There are places, we generate a request
 	ptr = new Client(mp->entered);
-	//ѕам€ть будет возвращена в методе CompieteO после завершени€ обслуживани€ 
-	//у первого либо у второго кассира. »ли в деструкторе, если к моменту 
-	//завершени€ моделировани€ за€вка еще будет находитьс€ в системе 
+	// The memory will be returned in the CompieteO method after the completion of the service
+	// at the first or at the second cashier. Or in the destructor, if by the time
+	// the completion of the simulation, the application will still be in the system
+
 	if (i == 1)
 	{
-		if (!serve1) //ѕоступаем на обслуживание к 1-му аптекарю
+		if (!serve1) // We get service to the 1st pharmacist
 		{
 			if (mp->total < mp->K * mp->Dump)
 			{
@@ -100,7 +101,7 @@ void Pharmacy::Arrival()
 			}
 			serve1 = ptr;
 		}
-		else //«а€вка встает в очередь
+		else // Application queues
 		{
 			qServe1[QLength(1)] = ptr;
 			if (mp->total < mp->K * mp->Dump)
@@ -110,7 +111,7 @@ void Pharmacy::Arrival()
 		}
 	}
 
-	else  // ѕоступаем на обслуживание к 2-му аптекаю
+	else  // We get service for the 2nd pharmacy
 	{
 		if (!serve2)
 		{
@@ -141,16 +142,16 @@ void Pharmacy::Complete(int i)
 {
 	int j;
 	mp->completed++;
-	// ≈сли это не первых уход, делаем статистические записи
+	// If this is not the first care, we make statistics
 	if (fromOut != -1)
 	{
 		mp->time_outbank << fromOut << endl;
 		mp->outAve = mp->outAve * (1 - 1.0 / (mp->completed - 1)) + ((float)fromOut) / (mp->completed - 1);
 	}
-	fromOut = 0; // —брос счетчика
-	if (i == 1) // ќбслуживает первый аптекарь
+	fromOut = 0; // Reset Counter
+	if (i == 1) // Serves the first pharmacist
 	{
-		// “рассировка, статистика по среднему времени пребывани€
+		// Trace, statistics on average time spent
 		if (mp->total < mp->K * mp->Dump)
 		{
 			mp->dump << mp->total << " - за€вка номер " << serve1->id << " покинула систему." << endl;
@@ -158,12 +159,12 @@ void Pharmacy::Complete(int i)
 		mp->sojourn << serve1->time << endl;
 		mp->sojAve = mp->sojAve * (1 - 1.0 / mp->completed) + ((float)(serve1->time)) / mp->completed;
 		delete serve1;
-		if (QLength(1) != 0)// ≈сли очередь не пуста, ставим на обслуживание очередную за€вку
+		if (QLength(1) != 0)// If the queue is not empty, put the next request for service
 		{
 			serve1 = qServe1[0];
 			for (auto j = 0; j < buff - 1; j++)
 			{
-				qServe1[j] = qServe1[j + 1]; // —двиг очереди
+				qServe1[j] = qServe1[j + 1]; // Queue Shift
 			}
 			qServe1[buff - 1] = nullptr;
 			toServe1 = (int)((rand() % 3 + 1) * mp->K);
@@ -179,9 +180,9 @@ void Pharmacy::Complete(int i)
 			toServe1 = -1;
 		}
 	}
-	else // ќбслуживает второй аптекарь
+	else // Serves the second pharmacist
 	{
-		// “рассировка, статистика по среднему времени пребывани€
+		// Trace, statistics on average time spent
 		if (mp->total < mp->K * mp->Dump)
 		{
 			mp->dump << mp->total << " - за€вка номер " << serve2->id << " покинула систему." << endl;
@@ -189,12 +190,12 @@ void Pharmacy::Complete(int i)
 		mp->sojourn << serve2->time << endl;
 		mp->sojAve = mp->sojAve * (1 - 1.0 / mp->completed) + ((float)(serve2->time)) / mp->completed;
 		delete serve2;
-		if (QLength(2) != 0)// ≈сли очередь не пуста, ставим на обслуживание очередную за€вку
+		if (QLength(2) != 0)// If the queue is not empty, put the next request for service
 		{
 			serve2 = qServe2[0];
 			for (auto j = 0; j < buff - 1; j++)
 			{
-				qServe2[j] = qServe2[j + 1]; // —двиг очереди
+				qServe2[j] = qServe2[j + 1]; // Queue Shift
 			}
 			qServe2[buff - 1] = nullptr;
 			toServe2 = (int)((rand() % 3 + 1) * mp->K);
@@ -217,18 +218,18 @@ void Pharmacy::Transition(int i)
 {
 	int tmp;
 	mp->transition++;
-	if (i == 1) // »з первой очереди во вторую
+	if (i == 1) // From the first line to the second
 	{
 		tmp = qServe1[QLength(1) - 1]->id;
 		if (mp->total < mp->K * mp->Dump)
 		{
 			mp->dump << mp->total << " - переход за€вки номер " << tmp << "с полосы " << i << endl;
 		}
-		//ѕереставл€ем за€вку из хвоста первой очереди в хвост второй
+		// Rearrange the order from the tail of the first line to the tail of the second
 		qServe2[QLength(2)] = qServe1[QLength(1) - 1];
 		qServe1[QLength(1) - 1] = nullptr;
 	}
-	else //»з второй очереди в первую
+	else // From the second stage to the first
 	{
 		tmp = qServe2[QLength(2) - 1]->id;
 		if (mp->total < mp->K * mp->Dump)
@@ -269,7 +270,7 @@ void Pharmacy::Run()
 	{
 		Arrival();
 	}
-	//ѕроверка услови€ перехода
+	// Check the transition condition
 	if ((QLength(2) - QLength(1)) > 1)
 	{
 		Transition(1);
@@ -278,7 +279,7 @@ void Pharmacy::Run()
 	{
 		Transition(1);
 	}
-	//»нкремент счетчика времени всех за€вок в системе
+	// Increment the time counter of all requests in the system
 	if (serve1 != nullptr)
 	{
 		(serve1->time)++;
@@ -293,7 +294,7 @@ void Pharmacy::Run()
 		if (qServe1[i] != nullptr) (qServe1[i]->time)++;
 		if (qServe2[i] != nullptr) (qServe2[i]->time)++;
 	}
-	// аждую единицу реального времени пересчет средних значений
+	// Each unit of real time recalculation of average values
 	if ((mp->total + 1) % mp->K == 0)
 	{
 		realTime = (mp->total + 1) / mp->K;
@@ -314,32 +315,31 @@ int Pharmacy::Choice()
 	int k1, k2;
 	k1 = QLength(1);
 	k2 = QLength(2);
-	if (k1 > k2 || serve2 == nullptr) // перва€ очередь больше второй или очередей нет, первый кассир зан€т, второй нет
+	if (k1 > k2 || serve2 == nullptr) // the first queue is larger than the second or there are no queues, the first cashier is busy, the second is not
 	{
 		return 2;
 	}
-	else if (k1 < k2 || serve1 == nullptr || k1 != buff) // втора€ очередь больше первой или в системе за€вок нет или очереди равны и не пусты
+	else if (k1 < k2 || serve1 == nullptr || k1 != buff) // the second line is larger than the first or there are no requests in the system or the lines are equal and not empty
 	{
 		return 1;
 	}
-	else // мест дл€ ожидани€ нет
+	else // no waiting places
 	{
 		return 0; 
 	}
 }
 
-//  то из аптекарей свободен
 int Pharmacy::Busy()
 {
 	if (serve1 == nullptr && serve2 == nullptr)
 	{
-		return 0; // ≈сли оба свободны
+		return 0; // If Both Are Free
 	}
-	else if (serve1 == nullptr || serve2 == nullptr) // ќдин из них свободен
+	else if (serve1 == nullptr || serve2 == nullptr) // One of them is free
 	{
 		return 1;
 	}
-	else // ≈сли оба зан€ты
+	else // If both are busy
 	{
 		return 2;
 	}

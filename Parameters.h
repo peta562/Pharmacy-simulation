@@ -6,24 +6,24 @@ using namespace std;
 
 struct ModelParamaters
 {
-	int K = 60; //Коэф мастабирования времени
+	int K = 60; // Time Mapping coefficient
 	int Dump = 100;
-	ofstream dump; //файл для трассировки 
-	ofstream num_inbank;//файл для сбора статистики о числе заявок в системе 
-	ofstream time_outbank;//файл для сбора статистики выходного потока 
-	ofstream sojourn; // файл для сбора статистики времени пребывания в системе
+	ofstream dump; // file to trace
+	ofstream num_inbank; // file for collecting statistics on the number of applications in the system
+	ofstream time_outbank; // file for collecting statistics of the output stream
+	ofstream sojourn; // file for collecting statistics on the time spent in the system
 
 
-	int entered = 0; //счетчик поступлений 
-	int completed = 0; //счетчик обслуженных заявок 
-	int transition = 0;  //счетчик переходов 
-	int reject = 0; //счетчик потерянных заявок
-	float que1Ave = 0; //переменная для пересчета средней длины очереди к первому окну 
-	float que2Ave = 0; //переменная для пересчета средней длины очереди ко второму окну
-	float numAve = 0;  //переменная для пересчета среднего числа заявок в системе
-	float sojAve = 0; //переменная для пересчета среднего времени пребывания заявок в системе 
-	float outAve = 0; //переменная для пересчета средней длительности интервала между уходами заявок 
-	float roAve = 0; //переменная для пересчета коэффициента загрузки системы 
-	long int total; //счетчик модельного времени 
+	int entered = 0; // receipt counter
+	int completed = 0; // counter of served orders
+	int transition = 0; // jump counter
+	int reject = 0; // counter of lost orders
+	float que1Ave = 0; // variable to recalculate the average length of the queue to the first window
+	float que2Ave = 0; // variable to recalculate the average length of the queue to the second window
+	float numAve = 0; // variable to recalculate the average number of applications in the system
+	float sojAve = 0; // variable to recalculate the average time spent by applications in the system
+	float outAve = 0; // variable for recalculating the average duration of the interval between departures
+	float roAve = 0; // variable for recalculating the system load factor
+	long int total; // model time counter
 
 };

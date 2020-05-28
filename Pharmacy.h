@@ -22,27 +22,27 @@ class Pharmacy
 {
 private:
 	static const int buff = 3;
-	static constexpr float inputRate = 2; // средняя интенсивность входного потока
-	static constexpr float serveRate = 1; // средняя длительность обслуживания
-	static constexpr float serveDisp = 0.3; // среднеквадратичное отклонение
-	Client *serve1, *serve2; // Клиенты
-	Client** qServe1, ** qServe2; // очереди к аптекарю
-	ModelParamaters *mp; // Структура с параметрами моделирования и файлами вывода статистики
-	int toArrival; // время до прибытия след. заявки
-	int toServe1; // время до завершения обслуживания 1
-	int toServe2; // время до завершения обсулживания 2
-	int fromOut; // время прошедшее с момента последнего ухода
+	static constexpr float inputRate = 2; // average input stream intensity
+	static constexpr float serveRate = 1; // average service time
+	static constexpr float serveDisp = 0.3; // standard deviation
+	Client *serve1, *serve2; // Clients
+	Client** qServe1, ** qServe2; // queues to the pharmacist
+	ModelParamaters *mp; // Structure with modeling parameters and statistics output files
+	int toArrival; // time to arrival next applications
+	int toServe1; // time until completion of service 1
+	int toServe2; // time to complete servicing 2
+	int fromOut; // time elapsed since the last departure
 public:
 	Pharmacy(ModelParamaters *m);
 	~Pharmacy();
-	//Моделирующие методы
-	void Arrival(); // прибытие новой заявки
-	void Complete(int i); //i-й аптекарь завершил обслуживание
-	void Transition(int i);//переход из i-й очереди
-	void Run(); //запуск
-	// Служебные методы
-	int Choice(); // выбор очереди при поступлении
-	int Busy(); // число занятых кассиров
-	int QLength(int k); // длина очереди к k-му кассиру
+	// Modeling methods
+	void Arrival(); // arrival of a new application
+	void Complete(int i); // i-th pharmacist completed the service
+	void Transition(int i);// transition from the i-th queue
+	void Run(); //launch
+	// Utility methods
+	int Choice(); // select the queue upon receipt
+	int Busy(); // number of cashiers employed
+	int QLength(int k); // queue length to the k-th cashier
 };
 
