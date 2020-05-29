@@ -1,6 +1,6 @@
 ﻿#include "Pharmacy.h"
 
-#define N 100000 // Время моделирования
+#define N 10000 // Время моделирования
 
 void TestModule()
 {

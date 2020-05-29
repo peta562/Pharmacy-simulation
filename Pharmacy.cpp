@@ -19,7 +19,7 @@ Pharmacy::Pharmacy(ModelParamaters* m)
 		qServe1[i] = nullptr;
 		qServe2[i] = nullptr;
 	}
-	toArrival = (int)((rand() % 2 + 1) * mp->K);
+	toArrival = (int)(getExp(inputRate) / mp->K);
 	if (toArrival == 0)
 	{
 		toArrival = 1;
@@ -64,7 +64,7 @@ void Pharmacy::Arrival()
 	{
 		mp->dump << mp->total << " - поступила новая заявка." << endl;
 	}
-	toArrival = (int)((rand() % 2 + 1) * mp->K);
+	toArrival = (int)(getExp(inputRate) / mp->K);
 	if (toArrival == 0)
 	{
 		toArrival = 1;
@@ -93,7 +93,7 @@ void Pharmacy::Arrival()
 			{
 				mp->dump << "заявка получила номер " << mp->entered << " и поступила на обслуживание к первому окну." << endl;
 			}
-			toServe1 = (int)((rand() % 3 + 1) * mp->K);
+			toServe1 = (int)(getNormal(serveRate, serveDisp) / mp->K);
 			if (toServe1 <= 0)
 			{
 				toServe1 = 1;
@@ -119,7 +119,7 @@ void Pharmacy::Arrival()
 			{
 				mp->dump << "заявка получила номер " << mp->entered << " и поступила на обслуживание к второму окну." << endl;
 			}
-			toServe2 = (int)((rand() % 3 + 1) * mp->K);
+			toServe2 = (int)(getNormal(serveRate, serveDisp) / mp->K);
 			if (toServe2 <= 0)
 			{
 				toServe2 = 1;
@@ -146,7 +146,7 @@ void Pharmacy::Complete(int i)
 	if (fromOut != -1)
 	{
 		mp->time_outbank << fromOut << endl;
-		mp->outAve = mp->outAve * (1 - 1.0 / (mp->completed - 1)) + ((float)fromOut) / (mp->completed - 1);
+		mp->outAve = mp->outAve * (1 - 1.0 / (mp->completed - 1)) + ((double)fromOut) / (mp->completed - 1);
 	}
 	fromOut = 0; // Reset Counter
 	if (i == 1) // Serves the first pharmacist
@@ -157,7 +157,7 @@ void Pharmacy::Complete(int i)
 			mp->dump << mp->total << " - заявка номер " << serve1->id << " покинула систему." << endl;
 		}
 		mp->sojourn << serve1->time << endl;
-		mp->sojAve = mp->sojAve * (1 - 1.0 / mp->completed) + ((float)(serve1->time)) / mp->completed;
+		mp->sojAve = mp->sojAve * (1 - 1.0 / mp->completed) + ((double)(serve1->time)) / mp->completed;
 		delete serve1;
 		if (QLength(1) != 0)// If the queue is not empty, put the next request for service
 		{
@@ -167,7 +167,7 @@ void Pharmacy::Complete(int i)
 				qServe1[j] = qServe1[j + 1]; // Queue Shift
 			}
 			qServe1[buff - 1] = nullptr;
-			toServe1 = (int)((rand() % 3 + 1) * mp->K);
+			toServe1 = (int)(getNormal(serveRate, serveDisp) / mp->K);
 			if (toServe1 <= 0)
 			{
 				toServe1 = 1;
@@ -188,7 +188,7 @@ void Pharmacy::Complete(int i)
 			mp->dump << mp->total << " - заявка номер " << serve2->id << " покинула систему." << endl;
 		}
 		mp->sojourn << serve2->time << endl;
-		mp->sojAve = mp->sojAve * (1 - 1.0 / mp->completed) + ((float)(serve2->time)) / mp->completed;
+		mp->sojAve = mp->sojAve * (1 - 1.0 / mp->completed) + ((double)(serve2->time)) / mp->completed;
 		delete serve2;
 		if (QLength(2) != 0)// If the queue is not empty, put the next request for service
 		{
@@ -198,7 +198,7 @@ void Pharmacy::Complete(int i)
 				qServe2[j] = qServe2[j + 1]; // Queue Shift
 			}
 			qServe2[buff - 1] = nullptr;
-			toServe2 = (int)((rand() % 3 + 1) * mp->K);
+			toServe2 = (int)(getNormal(serveRate, serveDisp) / mp->K);
 			if (toServe2 <= 0)
 			{
 				toServe2 = 1;
@@ -218,7 +218,17 @@ void Pharmacy::Transition(int i)
 {
 	int tmp;
 	mp->transition++;
-	if (i == 1) // From the first line to the second
+	if (i == 1) // From the second stage to the first
+	{
+		tmp = qServe2[QLength(2) - 1]->id;
+		if (mp->total < mp->K * mp->Dump)
+		{
+			mp->dump << mp->total << " - переход заявки номер " << tmp << "с полосы " << i << endl;
+		}
+		qServe1[QLength(1)] = qServe2[QLength(2) - 1];
+		qServe2[QLength(2) - 1] = nullptr;
+	}
+	else // From the first line to the second
 	{
 		tmp = qServe1[QLength(1) - 1]->id;
 		if (mp->total < mp->K * mp->Dump)
@@ -228,16 +238,6 @@ void Pharmacy::Transition(int i)
 		// Rearrange the order from the tail of the first line to the tail of the second
 		qServe2[QLength(2)] = qServe1[QLength(1) - 1];
 		qServe1[QLength(1) - 1] = nullptr;
-	}
-	else // From the second stage to the first
-	{
-		tmp = qServe2[QLength(2) - 1]->id;
-		if (mp->total < mp->K * mp->Dump)
-		{
-			mp->dump << mp->total << " - переход заявки номер " << tmp << "с полосы " << i << endl;
-		}
-		qServe1[QLength(1)] = qServe2[QLength(2) - 1];
-		qServe2[QLength(2) - 1] = nullptr;
 	}
 }
 
@@ -277,7 +277,7 @@ void Pharmacy::Run()
 	}
 	else if ((QLength(1) - QLength(2)) > 1)
 	{
-		Transition(1);
+		Transition(2);
 	}
 	// Increment the time counter of all requests in the system
 	if (serve1 != nullptr)
@@ -300,10 +300,10 @@ void Pharmacy::Run()
 		realTime = (mp->total + 1) / mp->K;
 		j = Busy() + QLength(1) + QLength(2);
 		mp->num_inbank << j << endl;
-		mp->numAve = mp->numAve * (1 - 1.0 / realTime) + ((float)j) / realTime;
-		mp->que1Ave = mp->que1Ave * (1 - 1.0 / realTime) + ((float)QLength(1)) / realTime;
-		mp->que2Ave = mp->que2Ave * (1 - 1.0 / realTime) + ((float)QLength(2)) / realTime;
-		mp->roAve = mp->roAve * (1 - 1.0 / realTime) + ((float)Busy()) / realTime;
+		mp->numAve = mp->numAve * (1 - 1.0 / realTime) + ((double)j) / realTime;
+		mp->que1Ave = mp->que1Ave * (1 - 1.0 / realTime) + ((double)QLength(1)) / realTime;
+		mp->que2Ave = mp->que2Ave * (1 - 1.0 / realTime) + ((double)QLength(2)) / realTime;
+		mp->roAve = mp->roAve * (1 - 1.0 / realTime) + ((double)Busy()) / realTime;
 	}
 
 
@@ -315,13 +315,13 @@ int Pharmacy::Choice()
 	int k1, k2;
 	k1 = QLength(1);
 	k2 = QLength(2);
-	if (k1 > k2 || serve2 == nullptr) // the first queue is larger than the second or there are no queues, the first cashier is busy, the second is not
-	{
-		return 2;
-	}
-	else if (k1 < k2 || serve1 == nullptr || k1 != buff) // the second line is larger than the first or there are no requests in the system or the lines are equal and not empty
+	if (k1 < k2 || serve1 == nullptr) // the first queue is less than the second or there are no queues, the second cashier is busy, the first is not
 	{
 		return 1;
+	}
+	else if (k1 > k2 || serve2 == nullptr || k2 != buff) // the first line is larger than the second or there are no requests in the system or the lines are equal and not empty
+	{
+		return 2;
 	}
 	else // no waiting places
 	{

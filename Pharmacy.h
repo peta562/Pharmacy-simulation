@@ -1,11 +1,11 @@
 #pragma once
 #include <iostream>
+#include <stdlib.h>
 #include <fstream>
 #include <ctime>
-#include <cmath>
 #include "Parameters.h"
+#include "RNG.h"
 
-using namespace std;
 
 
 class Client
@@ -22,9 +22,9 @@ class Pharmacy
 {
 private:
 	static const int buff = 3;
-	static constexpr float inputRate = 2; // average input stream intensity
-	static constexpr float serveRate = 1; // average service time
-	static constexpr float serveDisp = 0.3; // standard deviation
+	static constexpr double inputRate = 122.625; // average input stream intensity
+	static constexpr double serveRate = 201.68; // average service time
+	static constexpr double serveDisp = 100.57; // standard deviation
 	Client *serve1, *serve2; // Clients
 	Client** qServe1, ** qServe2; // queues to the pharmacist
 	ModelParamaters *mp; // Structure with modeling parameters and statistics output files

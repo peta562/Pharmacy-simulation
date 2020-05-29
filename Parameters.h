@@ -6,8 +6,8 @@ using namespace std;
 
 struct ModelParamaters
 {
-	int K = 60; // Time Mapping coefficient
-	int Dump = 100;
+	int K = 100; // Time Mapping coefficient
+	int Dump = 10;
 	ofstream dump; // file to trace
 	ofstream num_inbank; // file for collecting statistics on the number of applications in the system
 	ofstream time_outbank; // file for collecting statistics of the output stream
