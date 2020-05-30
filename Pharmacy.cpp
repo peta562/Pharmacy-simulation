@@ -142,7 +142,7 @@ void Pharmacy::Complete(int i)
 {
 	int j;
 	mp->completed++;
-	// If this is not the first care, we make statistics
+	// If this is not the first case, we make statistics
 	if (fromOut != -1)
 	{
 		mp->time_outbank << fromOut << endl;
@@ -218,12 +218,12 @@ void Pharmacy::Transition(int i)
 {
 	int tmp;
 	mp->transition++;
-	if (i == 1) // From the second stage to the first
+	if (i == 2) // From the second stage to the first
 	{
 		tmp = qServe2[QLength(2) - 1]->id;
 		if (mp->total < mp->K * mp->Dump)
 		{
-			mp->dump << mp->total << " - переход заявки номер " << tmp << "с полосы " << i << endl;
+			mp->dump << mp->total << " - переход заявки номер " << tmp << " с полосы " << i << endl;
 		}
 		qServe1[QLength(1)] = qServe2[QLength(2) - 1];
 		qServe2[QLength(2) - 1] = nullptr;
@@ -233,7 +233,7 @@ void Pharmacy::Transition(int i)
 		tmp = qServe1[QLength(1) - 1]->id;
 		if (mp->total < mp->K * mp->Dump)
 		{
-			mp->dump << mp->total << " - переход заявки номер " << tmp << "с полосы " << i << endl;
+			mp->dump << mp->total << " - переход заявки номер " << tmp << " с полосы " << i << endl;
 		}
 		// Rearrange the order from the tail of the first line to the tail of the second
 		qServe2[QLength(2)] = qServe1[QLength(1) - 1];
@@ -251,7 +251,7 @@ void Pharmacy::Run()
 	}
 	if (fromOut != -1)
 	{
-		fromOut--;
+		fromOut++;
 	}
 	if (toServe1 == 0)
 	{
@@ -273,11 +273,11 @@ void Pharmacy::Run()
 	// Check the transition condition
 	if ((QLength(2) - QLength(1)) > 1)
 	{
-		Transition(1);
+		Transition(2);
 	}
 	else if ((QLength(1) - QLength(2)) > 1)
 	{
-		Transition(2);
+		Transition(1);
 	}
 	// Increment the time counter of all requests in the system
 	if (serve1 != nullptr)
